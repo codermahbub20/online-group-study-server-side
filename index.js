@@ -58,6 +58,25 @@ async function run() {
         })
 
 
+        app.put('/createAssignment/:id', async(req,res) =>{
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = {upsert: true};
+            const updatedAssignment = req.body;
+            const assignment = {
+                $set: {
+                    title:updatedAssignment.title,
+                    description: updatedAssignment.description,
+                    mark: updatedAssignment.mark,
+                    photo: updatedAssignment.photo,
+                    level: updatedAssignment.level,
+                    date: updatedAssignment.date
+                }
+            } 
+            const result = await createAssignmnetCollection.updateOne(filter,assignment)
+            res.send(result);
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
