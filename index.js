@@ -4,12 +4,6 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
-// onlineGroupStudy
-// L3cWOC1YmDlfk40b
-
-
-
-
 
 
 
@@ -30,7 +24,35 @@ async function run() {
         await client.connect();
 
         const createAssignmnetCollection = client.db('onlineStudy').collection('createAssignment');
+        const userCollection = client.db('onlineStudy').collection('user')
+        const submitAssignment=client.db('onlineStudy').collection('submitted');
 
+
+        // user related api
+        app.post('/user', async (req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user)
+            console.log(result)
+            res.send(result)
+        })
+
+
+        app.get('/user', async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result)
+        })
+
+        // submitted assignment data
+        app.post('/submittedData',async(req,res) =>{
+            const body = req.body;
+            const result = await submitAssignment.insertOne(body);
+            res.send(result);
+        })
+
+        app.get('/submittedData',async (req,res) =>{
+            const result = await submitAssignment.find().toArray();
+            res.send(result)
+        })
 
 
         // create assignment related api
@@ -44,8 +66,17 @@ async function run() {
 
 
         app.get('/createAssignment', async (req, res) => {
-            const result = await createAssignmnetCollection.find().toArray();
+            // console.log(req.query)
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            const result = await createAssignmnetCollection.find().skip(page*size).limit(size).toArray();
             res.send(result)
+        })
+
+
+        app.get('/createAssignmentCount', async (req, res) => {
+            const count = await createAssignmnetCollection.estimatedDocumentCount()
+            res.send({ count })
         })
 
         // update Related api
@@ -58,22 +89,22 @@ async function run() {
         })
 
 
-        app.put('/createAssignment/:id', async(req,res) =>{
+        app.put('/createAssignment/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
-            const options = {upsert: true};
+            const options = { upsert: true };
             const updatedAssignment = req.body;
             const assignment = {
                 $set: {
-                    title:updatedAssignment.title,
+                    title: updatedAssignment.title,
                     description: updatedAssignment.description,
                     mark: updatedAssignment.mark,
                     photo: updatedAssignment.photo,
                     level: updatedAssignment.level,
                     date: updatedAssignment.date
                 }
-            } 
-            const result = await createAssignmnetCollection.updateOne(filter,assignment)
+            }
+            const result = await createAssignmnetCollection.updateOne(filter, assignment)
             res.send(result);
         })
 
