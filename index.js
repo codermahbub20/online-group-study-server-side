@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
@@ -28,6 +29,15 @@ async function run() {
         const submitAssignment=client.db('onlineStudy').collection('submitted');
 
 
+        // Auth related api create
+
+        app.post('/jwt', async(req,res) =>{
+            const user = req.body;
+            const token = jwt.sign(user,'3d51ce94ce9a97b89842b35feff705b3f626b36df0146e478fafb71a228fc2df095e40959c438c293e343d1fe01412d1528baeab7305ce22d27f2787bad2c266',{expiresIn:'1h'})
+            res.send(token)
+        })
+
+
         // user related api
         app.post('/user', async (req, res) => {
             const user = req.body;
@@ -47,11 +57,18 @@ async function run() {
             const body = req.body;
             const result = await submitAssignment.insertOne(body);
             res.send(result);
-            
+
         })
 
         app.get('/submittedData',async (req,res) =>{
             const result = await submitAssignment.find().toArray( );
+            res.send(result)
+        })
+
+        app.get('/submittedData/:id',async(req,res) =>{
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await submitAssignment.findOne(query)
             res.send(result)
         })
 
