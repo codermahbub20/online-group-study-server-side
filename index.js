@@ -1,11 +1,19 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
 
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true
+}));
+app.use(express.json());
+
+app.use(cookieParser())
 
 
 const uri = `mongodb+srv://onlineGroupStudy:L3cWOC1YmDlfk40b@cluster0.rarr4yf.mongodb.net/?retryWrites=true&w=majority`;
@@ -26,15 +34,20 @@ async function run() {
 
         const createAssignmnetCollection = client.db('onlineStudy').collection('createAssignment');
         const userCollection = client.db('onlineStudy').collection('user')
-        const submitAssignment=client.db('onlineStudy').collection('submitted');
+        const submitAssignment = client.db('onlineStudy').collection('submitted');
 
 
         // Auth related api create
 
-        app.post('/jwt', async(req,res) =>{
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user,'3d51ce94ce9a97b89842b35feff705b3f626b36df0146e478fafb71a228fc2df095e40959c438c293e343d1fe01412d1528baeab7305ce22d27f2787bad2c266',{expiresIn:'1h'})
-            res.send(token)
+            const token = jwt.sign(user, '3d51ce94ce9a97b89842b35feff705b3f626b36df0146e478fafb71a228fc2df095e40959c438c293e343d1fe01412d1528baeab7305ce22d27f2787bad2c266', { expiresIn: '1h' });
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'none'
+            })
+                .send({ success: true })
         })
 
 
@@ -53,19 +66,19 @@ async function run() {
         })
 
         // submitted assignment data
-        app.post('/submittedData',async(req,res) =>{
+        app.post('/submittedData', async (req, res) => {
             const body = req.body;
             const result = await submitAssignment.insertOne(body);
             res.send(result);
 
         })
 
-        app.get('/submittedData',async (req,res) =>{
-            const result = await submitAssignment.find().toArray( );
+        app.get('/submittedData', async (req, res) => {
+            const result = await submitAssignment.find().toArray();
             res.send(result)
         })
 
-        app.get('/submittedData/:id',async(req,res) =>{
+        app.get('/submittedData/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await submitAssignment.findOne(query)
@@ -87,7 +100,7 @@ async function run() {
             // console.log(req.query)
             const page = parseInt(req.query.page);
             const size = parseInt(req.query.size);
-            const result = await createAssignmnetCollection.find().skip(page*size).limit(size).toArray();
+            const result = await createAssignmnetCollection.find().skip(page * size).limit(size).toArray();
             res.send(result)
         })
 
