@@ -47,10 +47,11 @@ async function run() {
             const body = req.body;
             const result = await submitAssignment.insertOne(body);
             res.send(result);
+            
         })
 
         app.get('/submittedData',async (req,res) =>{
-            const result = await submitAssignment.find().toArray();
+            const result = await submitAssignment.find().toArray( );
             res.send(result)
         })
 
