@@ -1,33 +1,16 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
+
 let jwt = require('jsonwebtoken');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
 
 // middleware
-app.use(cors({
-    origin: ['http://localhost:5173'],
-    credentials: true
-}));
 app.use(express.json());
+app.use(cors());
 
-app.use(cookieParser())
-
-
-app.use(cors({
-    origin: [
-        // 'http://localhost:5173'
-        'https://online-group-study-crud-jwt.web.app/',
-        'https://online-group-study-crud-jwt.firebaseapp.com'
-    ],
-    credentials: true
-}));
-app.use(express.json());
-
-app.use(cookieParser())
 
 // middlewares
 // const verifyToken = async (req, res, next)=>{
@@ -66,7 +49,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+       
 
         const createAssignmnetCollection = client.db('onlineStudy').collection('createAssignment');
         const userCollection = client.db('onlineStudy').collection('user')
@@ -139,7 +122,7 @@ async function run() {
                     note: submittedAssignment.note
                 }
             }
-            const result = await createAssignmnetCollection.updateOne(filter, assignment)
+            const result = await createAssignmnetCollection.updateOne(filter, assignment,options)
             res.send(result);
         })
 
