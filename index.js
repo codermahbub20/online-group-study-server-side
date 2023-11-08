@@ -138,7 +138,7 @@ async function run() {
 
 
         app.get('/createAssignment', async (req, res) => {
-            // console.log(req.query)
+            console.log(req.query)
             // let queryObj = {}
             // const level = req.query.level;
             // if(level){
@@ -146,10 +146,11 @@ async function run() {
             // }
 
             const page = Number(req.query.page);
-            const limit = Number(req.query.limit);
+            const limit = Number(req.query.size);
 
             console.log('page is:', page, 'size is:', limit);
-            const result = await createAssignmnetCollection.find().toArray();
+
+            const result = await createAssignmnetCollection.find().skip(page * limit).limit(limit).toArray();
             res.send(result)
         })
 
