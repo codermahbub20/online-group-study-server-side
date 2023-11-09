@@ -52,7 +52,9 @@ async function run() {
        
 
         const createAssignmnetCollection = client.db('onlineStudy').collection('createAssignment');
-        const userCollection = client.db('onlineStudy').collection('user')
+
+        // const userCollection = client.db('onlineStudy').collection('user')
+
         const submitAssignment = client.db('onlineStudy').collection('submitted');
 
 
@@ -122,7 +124,7 @@ async function run() {
                     note: submittedAssignment.note
                 }
             }
-            const result = await createAssignmnetCollection.updateOne(filter, assignment,options)
+            const result = await submitAssignment.updateOne(filter, assignment,options)
             res.send(result);
         })
 
@@ -139,11 +141,7 @@ async function run() {
 
         app.get('/createAssignment', async (req, res) => {
             console.log(req.query)
-            // let queryObj = {}
-            // const level = req.query.level;
-            // if(level){
-            //     queryObj.level = level;
-            // }
+            
 
             const page = Number(req.query.page);
             const limit = Number(req.query.size);
